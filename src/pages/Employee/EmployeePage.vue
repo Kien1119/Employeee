@@ -4,14 +4,25 @@
       <h2>Employee</h2>
       <form class="form-employee">
         <div class="card flex flex-wrap justify-center gap-1">
-          <IconField>
-            <InputIcon class="pi pi-search" />
-            <InputText
-              v-model="searchText"
-              placeholder="Search"
-              style="width: 300px"
+          <InputGroup>
+            <SubmitButton
+              @click="handleSearch"
+              icon="pi pi-search"
+              severity="search"
             />
-          </IconField>
+            <!-- @keyup.enter="applyFilters" -->
+            <InputText
+              size="small"
+              placeholder="Search...."
+              v-model="searchQuery"
+            />
+            <SubmitButton
+              icon="pi pi-times"
+              severity="danger"
+              @click="resetFilters"
+            />
+          </InputGroup>
+
           <div class="card flex justify-content-center">
             <SelectButton
               @click="genderClick"
@@ -133,7 +144,7 @@
         </div>
 
         <div>
-          <TabView @tab-click="fetchData()">
+          <TabView>
             <TabPanel header="List">
               <DataTable
                 :lazy="true"
@@ -146,7 +157,7 @@
                 selectionMode="single"
                 scrollable
                 scrollHeight="600px"
-                :value="filterData"
+                :value="filteredData"
                 tableStyle="min-width: 50rem"
                 @page="onPage"
               >
@@ -187,13 +198,22 @@
                   style="width: 10rem"
                 >
                   <template #body="{ data }">
+                    <ConfirmToast />
                     <div class="flex flex-wrap gap-2">
-                      <SubmitButton type="button" icon="pi pi-trash" rounded />
+                      <SubmitButton
+                        :id="data.id"
+                        @click="deleData(data.id)"
+                        type="button"
+                        icon="pi pi-trash"
+                        rounded
+                      />
+
                       <SubmitButton
                         type="button"
                         icon="pi pi-pencil"
                         rounded
                         severity="success"
+                        @click="onEdit"
                       />
                       <SubmitButton
                         @click="submitProfile(data)"
@@ -205,6 +225,8 @@
                   </template>
                 </TableColumn>
               </DataTable>
+
+              <ConfirmDialog></ConfirmDialog>
             </TabPanel>
             <TabPanel header="Cards">
               <p>CARDS</p>
@@ -218,17 +240,20 @@
 
 <script setup>
 import axios from "axios";
-import { onMounted, ref } from "vue";
+import { watch, onMounted, ref } from "vue";
 import { useForm } from "vee-validate";
 import * as yup from "yup";
 import { useRouter } from "vue-router";
-
+import { useConfirm } from "primevue/useconfirm";
+import { useToast } from "primevue/usetoast";
 const router = useRouter();
 // const data = ref();
 
 const visible = ref(false);
-const searchText = ref("");
+const searchQuery = ref("");
 const totalRecords = ref(0);
+const confirm = useConfirm();
+const toast = useToast();
 const lazyParams = ref({
   first: 0,
   rows: 5,
@@ -263,7 +288,7 @@ function genderClick() {}
 //   return results;
 // });
 const filterData = ref([]);
-
+const filteredData = ref([]);
 const { errors, handleSubmit, defineField } = useForm({
   validationSchema: yup.object({
     firstName: yup
@@ -283,22 +308,54 @@ const { errors, handleSubmit, defineField } = useForm({
   }),
 });
 
-const onSubmit = handleSubmit(async (values) => {
-  const req = {
-    firstName: values.firstName,
-    lastName: values.lastName,
-    email: values.email,
-    height: values.height,
-    phone: values.phone,
-    weight: values.weight,
-    gender: values.gender,
-  };
+const onSubmit = handleSubmit((values) => {
+  confirm.require({
+    message: "Do you want to Add this record?",
+    header: "Add Employeee",
+    icon: "pi pi-info-circle",
+    rejectLabel: "Cancel",
+    acceptLabel: "Add",
+    rejectClass: "p-button-secondary p-button-outlined",
+    acceptClass: "p-button-danger",
+    accept: async () => {
+      toast.add({
+        severity: "info",
+        summary: "Confirmed",
+        detail: "Record deleted",
+        life: 3000,
+      });
+      const req = {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        height: values.height,
+        phone: values.phone,
+        weight: values.weight,
+        gender: values.gender,
+      };
+      if (req) {
+        try {
+          await axios.post(`https://dummyjson.com/users/add`, req);
 
-  const id = 1;
+          visible.value = true;
+        } catch (error) {
+          console.error("lỗi data");
+        }
 
-  await axios.post(`https://dummyjson.com/posts/${id}`, req);
-
-  visible.value = false;
+        visible.value = false;
+      } else {
+        alert("Add Thất bại");
+      }
+    },
+    reject: () => {
+      toast.add({
+        severity: "error",
+        summary: "Rejected",
+        detail: "You have rejected",
+        life: 3000,
+      });
+    },
+  });
 });
 
 const [firstName, firstNameAttrs] = defineField("firstName");
@@ -310,8 +367,7 @@ const [weight, weightAttrs] = defineField("weight");
 const loading = ref(false);
 const fetchUsers = async (rows, page) => {
   const skip = (page - 1) * rows;
-  const url = `https://dummyjson.com/users?limit=${rows}&skip=${skip}&select=firstName,lastName,email,height,phone,gender,weight,age`;
-
+  const url = `https://dummyjson.com/users/search?q=${searchQuery.value}&limit=${rows}&skip=${skip}&select=firstName,lastName,email,height,phone,gender,weight,age`;
   try {
     loading.value = true;
     const response = await axios.get(url);
@@ -322,6 +378,7 @@ const fetchUsers = async (rows, page) => {
     console.log("1", filterData.value);
 
     totalRecords.value = data.total;
+    applyFilters();
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu:", error);
   } finally {
@@ -344,11 +401,84 @@ onMounted(() => {
 });
 const submitProfile = (data) => {
   if (data && data.id) {
-    localStorage.setItem("useData", JSON.stringify(data));
+    // localStorage.setItem("useData", JSON.stringify(data));
+
     router.push({ name: "employee-detail", params: { id: data.id } });
   } else {
     console.error("Không có dữ liệu hợp lệ được chọn.");
   }
+};
+watch(
+  [searchQuery, genderValue],
+  () => {
+    applyFilters();
+  },
+  4000
+);
+
+const applyFilters = () => {
+  let results = filterData.value;
+
+  if (searchQuery.value) {
+    results = results.filter(
+      (item) =>
+        item.firstName
+          .toUpperCase()
+          .includes(searchQuery.value.toUpperCase()) ||
+        item.lastName.toUpperCase().includes(searchQuery.value.toUpperCase()) ||
+        item.email.toUpperCase().includes(searchQuery.value.toUpperCase()) ||
+        item.phone.includes(searchQuery.value)
+    );
+  }
+
+  if (genderValue.value) {
+    results = results.filter((item) => item.gender === genderValue.value);
+  }
+
+  filteredData.value = results;
+};
+
+const resetFilters = () => {
+  searchQuery.value = "";
+  genderValue.value = "";
+  fetchUsers();
+};
+const handleSearch = () => {
+  // searchQuery.value = "";
+  // genderValue.value = "";
+  fetchUsers(lazyParams.value.rows, lazyParams.value.page);
+};
+const deleData = (id) => {
+  confirm.require({
+    message: "Do you want to delete this record?",
+    header: "Danger Zone",
+    icon: "pi pi-info-circle",
+    rejectLabel: "Cancel",
+    acceptLabel: "Delete",
+    rejectClass: "p-button-secondary p-button-outlined",
+    acceptClass: "p-button-danger",
+    accept: async () => {
+      toast.add({
+        severity: "info",
+        summary: "Confirmed",
+        detail: "Record deleted",
+        life: 3000,
+      });
+      try {
+        await axios.delete(`https://dummyjson.com/users/${id}`);
+      } catch (error) {
+        console.error("lỗi ko xóa data");
+      }
+    },
+    reject: () => {
+      toast.add({
+        severity: "error",
+        summary: "Rejected",
+        detail: "You have rejected",
+        life: 3000,
+      });
+    },
+  });
 };
 </script>
 
@@ -413,5 +543,8 @@ h2 {
 }
 .p-tabview-nav-link .p-tabview-header-action {
   margin-left: 10px;
+}
+.p-button.p-component.p-confirm-dialog-accept.p-button-danger {
+  background: #2196f3 !important;
 }
 </style>
