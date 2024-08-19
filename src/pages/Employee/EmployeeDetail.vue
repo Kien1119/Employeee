@@ -129,7 +129,7 @@
           </div>
         </TabPanel>
         <TabPanel header="Cards">
-          <div class="body-card">
+          <div v-if="userPosts && userPosts.length > 0" class="body-card">
             <BodyCard v-for="(item, index) in userPosts" :key="index">
               <template #title>{{ item.title }}</template>
               <template #content>
@@ -138,6 +138,19 @@
                 </p>
               </template>
             </BodyCard>
+          </div>
+          <div v-else>
+            <span>Không có thẻ Card nào!!!</span>
+          </div>
+        </TabPanel>
+        <TabPanel header="To do">
+          <div v-if="userTodo" class="card">
+            <DataTable :value="userTodo" tableStyle="min-width: 50rem">
+              <TableColumn field="id" header="ID"></TableColumn>
+              <TableColumn field="todo" header="TO DO"></TableColumn>
+              <TableColumn field="completed" header="COMPLETED"></TableColumn>
+              <TableColumn field="userId" header="User ID"></TableColumn>
+            </DataTable>
           </div>
         </TabPanel>
       </TabView>
@@ -166,7 +179,7 @@ const route = useRouter();
 const data = ref(null);
 const userPosts = ref(null);
 const loading = ref(false);
-
+const userTodo = ref(null);
 // const oncancel = () => {
 //   route.push({ path: "/employee" });
 // };
@@ -271,6 +284,18 @@ const fetchDaaUser = async () => {
       )
       .then((response) => {
         userPosts.value = response.data.posts;
+      })
+      .catch((error) => {
+        console.error("Error fetching data data:", error);
+      });
+    await axios
+      .get(
+        `https://dummyjson.com/users/${route.currentRoute.value.params.id}/todos`
+      )
+      .then((response) => {
+        console.log({ response });
+        userTodo.value = response.data.todos;
+        console.log("userTodo", userTodo.value);
       })
       .catch((error) => {
         console.error("Error fetching data data:", error);
