@@ -24,25 +24,11 @@ export default {
 };
 </script>
 <style scoped>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-body {
-  display: flex;
-}
-
 .main-body {
   display: flex;
 }
 
 .main-body .sidebar {
   width: 20vw;
-}
-
-.main-body .right_side {
-  flex-direction: column;
-  width: 70vw;
 }
 </style>

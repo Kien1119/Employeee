@@ -2,7 +2,7 @@
   <div>
     <div class="container">
       <h2>Employee</h2>
-      <form class="form-employee">
+      <form>
         <div class="card flex flex-wrap justify-center gap-1">
           <InputGroup>
             <SubmitButton
@@ -541,16 +541,8 @@ const genderClick = async () => {
 </script>
 
 <style scoped>
-.container {
-  margin: 10px;
-  padding: 10px;
-}
-.form-employee {
-  border: 1px solid #6666;
-
-  background: #cccccc;
-  height: 100vh;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1);
+form {
+  display: block;
 }
 h2 {
   font-size: 32px;
@@ -582,7 +574,9 @@ h2 {
 .profile-2 {
   width: 45%;
 }
-
+.p-inputtext.p-component.p-inputtext-sm {
+  margin: 0;
+}
 .wrap_div {
   display: flex;
   flex-direction: column;
