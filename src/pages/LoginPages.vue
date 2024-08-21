@@ -72,11 +72,11 @@ const [username, usernameAttrs] = defineField("username");
 const [password, passwordAttrs] = defineField("password");
 </script>
 <style>
-* {
+/* * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
+} */
 body {
   background: #0000000d;
   height: 100vh;
