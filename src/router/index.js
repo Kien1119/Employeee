@@ -13,19 +13,19 @@ export const routes = [
     path: "/login",
     name: "Login",
     component: () => import("../pages/LoginPages.vue"),
-    meta: { layout: SingleLayout, requireAuth: false },
+    meta: { layout: SingleLayout, requiresAuth: false },
   },
   {
     path: "/logout",
     name: "Logout",
     component: () => import("../pages/LogoutPages.vue"),
-    meta: { layout: SingleLayout, requireAuth: false },
+    meta: { layout: SingleLayout, requiresAuth: false },
   },
   {
     path: "/test",
     name: "Test",
     component: () => import("../pages/Test/TestPage.vue"),
-    meta: { layout: MainLayout, requireAuth: true },
+    meta: { layout: MainLayout, requiresAuth: true },
   },
   {
     path: "/employee",
@@ -43,6 +43,18 @@ export const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+const isAuthenticated = () => {
+  return !!localStorage.getItem("useInfo");
+};
+
+router.beforeEach((to, from, next) => {
+  if (to.name !== "Login" && !isAuthenticated()) {
+    next({ name: "Login" });
+  } else {
+    next();
+  }
 });
 
 export default router;

@@ -160,6 +160,21 @@
         <p>{{ item.body }}</p>
       </div> -->
     </div>
+    <div v-else-if="loading">
+      <ProgressSpinner
+        style="
+          width: 50px;
+          height: 50px;
+          display: flex;
+          align-items: center;
+          top: 20px;
+        "
+        strokeWidth="8"
+        fill="transparent"
+        animationDuration=".5s"
+        aria-label="Custom ProgressSpinner"
+      />
+    </div>
     <div v-else>
       <p>Không tìm thấy dữ liệu nhân viên.</p>
     </div>
@@ -204,7 +219,7 @@ const onSubmit = () => {
         email: data.value.email,
         phone: data.value.phone,
         height: data.value.height,
-        weight: data.value.weigh,
+        weight: data.value.weight,
         age: data.value.age,
       };
 

@@ -147,19 +147,22 @@
           <TabView>
             <TabPanel header="List">
               <DataTable
-                :lazy="true"
-                paginator
+                :paginator="true"
                 :loading="loading"
                 :rows="lazyParams.rows"
-                :first="lazyParams.first"
+                lazy
                 :totalRecords="totalRecords"
-                :rowsPerPageOptions="[5, 10, 15, 20]"
+                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                :rowsPerPageOptions="[5, 10, 25]"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
                 selectionMode="single"
                 scrollable
                 scrollHeight="600px"
                 :value="filteredData"
                 tableStyle="min-width: 50rem"
                 @page="onPage"
+                @filter="onFilter"
+                @sort="onSort"
               >
                 <TableColumn sortable field="id" header="ID"></TableColumn>
                 <TableColumn sortable field="firstName" header="First Name">
@@ -213,7 +216,6 @@
                         icon="pi pi-pencil"
                         rounded
                         severity="success"
-                        @click="onEdit"
                       />
                       <SubmitButton
                         @click="submitProfile(data)"
@@ -254,16 +256,16 @@ const searchQuery = ref("");
 const totalRecords = ref(0);
 const confirm = useConfirm();
 const toast = useToast();
-const lazyParams = ref({
-  first: 0,
-  rows: 5,
-  page: 1,
-});
+const genderData = ref([]);
+// const searchData = ref([]);
+// const lazyParams = ref({
+//   first: 0,
+//   rows: 5,
+//   page: 1,
+// });
 
 const genderValue = ref();
-const options = ref(["male", "female"]);
 
-function genderClick() {}
 // const filterData = computed(() => {
 //   if (!data.value) {
 //     return [];
@@ -365,39 +367,82 @@ const [height, heightAttrs] = defineField("height");
 const [phone, phoneAttrs] = defineField("phone");
 const [weight, weightAttrs] = defineField("weight");
 const loading = ref(false);
-const fetchUsers = async (rows, page) => {
-  const skip = (page - 1) * rows;
-  const url = `https://dummyjson.com/users/search?q=${searchQuery.value}&limit=${rows}&skip=${skip}&select=firstName,lastName,email,height,phone,gender,weight,age`;
+
+const fetchUsers = async (
+  lazyParams,
+  sortField = "firstName,lastName,email,height,phone,weight,age,gender",
+  sortOrder = "asc"
+) => {
+  // console.log("fetch");
+  // const { first, row, page } = lazyParams;
+  // const skip = ((page || 0) - 1) * (row || 0);
+
+  // console.log({ first, row, lazyParams });
+  // const url = `https://dummyjson.com/users/search?q=${
+  //   searchQuery.value
+  // }&limit=${first ?? 10}&skip=${
+  //   skip ?? 0
+  // }&select=firstName,lastName,email,height,phone,weight`;
+  const page = lazyParams.page;
+  // const first = lazyParams.first;
+  const row = lazyParams.rows;
+  const limit = (page - 1) * row;
+  const url_limit = `https://dummyjson.com/users/search?q=${searchQuery.value}&limit=${row}&skip=${limit}&sortBy=${sortField}&order=${sortOrder}&select=firstName,lastName,email,height,phone,weight,age,gender`;
+
   try {
     loading.value = true;
-    const response = await axios.get(url);
+    const response = await axios.get(url_limit);
 
     const { data } = response;
-    // Gán dữ liệu từ API vào filterData
     filterData.value = data.users;
-    console.log("1", filterData.value);
+    filteredData.value = data.users;
 
     totalRecords.value = data.total;
-    applyFilters();
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu:", error);
   } finally {
     loading.value = false;
   }
+  // try {
+  //   loading.value = true;
+  //   const response = await axios.get(url_sort);
+
+  //   const { users, total } = response.data;
+  //   filterData.value = users;
+  //   totalRecords.value = total;
+  // } catch (error) {
+  //   console.error("Error fetching data:", error);
+  // } finally {
+  //   loading.value = false;
+  // }
 };
 
+const lazyParams = ref({
+  first: 5,
+  page: 1,
+  rows: 5,
+});
 const onPage = (event) => {
   lazyParams.value = {
-    ...lazyParams.value,
-    first: event.first,
-    rows: event.rows,
     page: event.page + 1,
+    rows: event.rows,
   };
-  fetchUsers(lazyParams.value.rows, lazyParams.value.page);
+  fetchUsers(lazyParams.value);
+};
+const sortField = ref("");
+const sortOrder = ref("");
+const onSort = (event) => {
+  const sortField = event.sortField;
+  const sortOrder = event.sortOrder === 1 ? "asc" : "desc";
+  console.log("onSort");
+  fetchUsers(lazyParams.value, sortField, sortOrder);
+};
+const onFilter = async (event) => {
+  console.log(event);
 };
 
 onMounted(() => {
-  fetchUsers(lazyParams.value.rows, lazyParams.value.page);
+  fetchUsers(lazyParams.value, sortField.value, sortOrder.value);
 });
 const submitProfile = (data) => {
   if (data && data.id) {
@@ -408,45 +453,44 @@ const submitProfile = (data) => {
     console.error("Không có dữ liệu hợp lệ được chọn.");
   }
 };
-watch(
-  [searchQuery, genderValue],
-  () => {
-    applyFilters();
-  },
-  4000
-);
+watch([searchQuery], () => {
+  console.log("watch([searchQuery, genderValue>>>>");
+  fetchUsers(lazyParams.value, sortField.value, sortOrder.value);
+});
 
-const applyFilters = () => {
-  let results = filterData.value;
+// const applyFilters = async () => {
+//   let results = filterData.value;
+//   console.log(1);
+//   if (searchQuery.value) {
+//     console.log(2);
+// results = results.filter(
+//   (item) =>
+//     item.firstName
+//       .toUpperCase()
+//       .includes(searchQuery.value.toUpperCase()) ||
+//     item.lastName.toUpperCase().includes(searchQuery.value.toUpperCase()) ||
+//     item.email.toUpperCase().includes(searchQuery.value.toUpperCase()) ||
+//     item.phone.includes(searchQuery.value)
+//);
+//     fetchUsers(lazyParams.value, sortField.value, sortOrder.value);
+//   }
 
-  if (searchQuery.value) {
-    results = results.filter(
-      (item) =>
-        item.firstName
-          .toUpperCase()
-          .includes(searchQuery.value.toUpperCase()) ||
-        item.lastName.toUpperCase().includes(searchQuery.value.toUpperCase()) ||
-        item.email.toUpperCase().includes(searchQuery.value.toUpperCase()) ||
-        item.phone.includes(searchQuery.value)
-    );
-  }
+//   if (genderValue.value) {
+//     console.log();
+//   }
 
-  if (genderValue.value) {
-    results = results.filter((item) => item.gender === genderValue.value);
-  }
-
-  filteredData.value = results;
-};
+//   filteredData.value = results;
+// };
 
 const resetFilters = () => {
   searchQuery.value = "";
   genderValue.value = "";
-  fetchUsers();
+  fetchUsers(lazyParams.value, sortField, sortOrder);
 };
 const handleSearch = () => {
   // searchQuery.value = "";
   // genderValue.value = "";
-  fetchUsers(lazyParams.value.rows, lazyParams.value.page);
+  fetchUsers(lazyParams.value, sortField, sortOrder);
 };
 const deleData = (id) => {
   confirm.require({
@@ -479,6 +523,20 @@ const deleData = (id) => {
       });
     },
   });
+};
+
+const url_filter = (val) =>
+  `https://dummyjson.com/users/filter?key=gender&value=${val}`;
+const options = ref(["male", "female"]);
+const genderClick = async () => {
+  try {
+    const response = await axios.get(url_filter(genderValue.value));
+    console.log({ genderValue: genderValue.value, response });
+    genderData.value = response.data;
+    filteredData.value = response.data.users;
+  } catch (error) {
+    console.error("Error data");
+  }
 };
 </script>
 
