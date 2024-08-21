@@ -485,7 +485,7 @@ watch([searchQuery], () => {
 const resetFilters = () => {
   searchQuery.value = "";
   genderValue.value = "";
-  fetchUsers(lazyParams.value, sortField, sortOrder);
+  fetchUsers(lazyParams.value);
 };
 const handleSearch = () => {
   // searchQuery.value = "";
@@ -560,9 +560,9 @@ h2 {
 .card.flex.flex-wrap.justify-center.gap-1 {
   justify-content: space-between;
 }
-.card.flex.justify-center {
+/* .card.flex.justify-center {
   margin: 20px;
-}
+} */
 .p-selectbutton.p-button-group.p-component {
   display: flex;
 }
@@ -583,7 +583,9 @@ h2 {
   gap: 5px;
   padding-bottom: 10px;
 }
-
+button {
+  margin: 0;
+}
 .input_class {
   width: 100% !important;
 }

@@ -381,9 +381,7 @@ onMounted(() => {
 .profile-2 {
   width: 45%;
 }
-.p-button.p-component {
-  margin: 0 30px;
-}
+
 .body-card {
   display: flex;
 }
