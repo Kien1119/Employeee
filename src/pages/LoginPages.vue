@@ -16,6 +16,7 @@
           <div class="main-user">
             <ValidationField name="username">
               <InputText
+                class="inputText"
                 type="text"
                 name="username"
                 v-model="username"
@@ -27,13 +28,30 @@
               errors.username
             }}</span>
             <ValidationField name="password">
-              <PasswordInput
+              <!-- <PasswordInput
+                variant="filled"
                 v-model="password"
                 v-bind="passwordAttrs"
+                class="password"
                 name="password"
                 placeholder="Password"
                 toggleMask
+                :feedback="false"
+              /> -->
+              <!-- <div class="PasswordInput"> -->
+              <PasswordInput
+                variant="filled"
+                v-model="password"
+                v-bind="passwordAttrs"
+                :fluid="true"
+                class="password"
+                inputStyle="width: 304px; border-radius: 10px;"
+                name="password"
+                placeholder="Password"
+                toggleMask
+                :feedback="false"
               />
+              <!-- </div> -->
             </ValidationField>
             <span style="color: #d81221">{{ errors.password }}</span>
 
@@ -71,17 +89,20 @@ const onSubmit = handleSubmit((values) => {
 const [username, usernameAttrs] = defineField("username");
 const [password, passwordAttrs] = defineField("password");
 </script>
-<style>
-/* * {
+<style scoped>
+* {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-} */
+}
 body {
   background: #0000000d;
   height: 100vh;
 }
-
+.PasswordInput {
+  height: 30px !important;
+  width: 304px !important;
+}
 .slide {
   width: calc(100% - 100px);
   height: calc(80% - 300px);
@@ -93,12 +114,21 @@ body {
   left: 50px;
   border-radius: 20px;
 }
-
+.inputText {
+  height: 40px;
+  width: 304px;
+  border-radius: 10px;
+}
+.label {
+  height: 30px;
+  width: 304px;
+}
 form {
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 .main {
   display: flex;
   height: 400px;
@@ -116,6 +146,8 @@ form {
   padding: 50px;
   height: 400px;
   width: 600px;
+  border: 2px solid #0000000d;
+  border-radius: 20px;
 }
 img {
   height: 50px;
@@ -132,10 +164,17 @@ img {
   margin: 10px;
 }
 .main-user {
-  width: 504px;
-  height: 208px;
+  margin-left: 100px;
+  margin-top: 30px;
+  width: 304px;
+  height: 158px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-content: center;
 }
 
+/*
 .p-inputtext.p-component {
   display: flex;
   margin: 20px;
@@ -158,8 +197,8 @@ img {
   color: #fff;
   font-size: 22px;
   height: 40px;
-}
-.p-button.p-component.label:hover {
+} */
+/* .p-button.p-component.label:hover {
   background: #880000;
   color: #fff;
 }
@@ -174,5 +213,5 @@ img {
 .p-icon.p-input-icon {
   right: 30px;
   top: 30px;
-}
+} */
 </style>

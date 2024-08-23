@@ -6,7 +6,7 @@
 export default {};
 </script>
 
-<style>
+<style scoped>
 .appBar {
   width: 100%;
   height: 60px;

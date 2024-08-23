@@ -11,10 +11,13 @@
               severity="search"
             />
             <!-- @keyup.enter="applyFilters" -->
+
+            <!-- @input="debouncedSearch" -->
             <InputText
               size="small"
               placeholder="Search...."
               v-model="searchQuery"
+              @keyup.enter="debouncedSearch()"
             />
             <SubmitButton
               icon="pi pi-times"
@@ -22,17 +25,17 @@
               @click="resetFilters"
             />
           </InputGroup>
-
-          <div class="card flex justify-content-center">
-            <SelectButton
-              @click="genderClick"
-              v-model="genderValue"
-              :options="options"
-              aria-labelledby="basic"
-            />
+          <div class="addEmployee">
+            <div class="card flex justify-content-center">
+              <SelectButton
+                @click="genderClick"
+                v-model="genderValue"
+                :options="options"
+                aria-labelledby="basic"
+              />
+            </div>
+            <SubmitButton label="Add Employment" @click="visible = true" />
           </div>
-          <SubmitButton label="Add Employment" @click="visible = true" />
-
           <TableDialog
             v-model:visible="visible"
             modal
@@ -161,10 +164,26 @@
                 :value="filteredData"
                 tableStyle="min-width: 50rem"
                 @page="onPage"
-                @filter="onFilter"
                 @sort="onSort"
               >
-                <TableColumn sortable field="id" header="ID"></TableColumn>
+                <TableColumn
+                  field="stt"
+                  header="STT"
+                  page=""
+                  style="width: 10rem"
+                >
+                  <template #body="{ index }">
+                    {{ computedIndex + index + 1 }}
+                  </template>
+                </TableColumn>
+
+                <!-- <template #body="{ index }">
+                  <ConfirmToast />
+                  <div class="flex flex-wrap gap-2">
+                    {{ index }}
+                  </div>
+                </template> -->
+                <!-- <TableColumn sortable field="id" header="ID"> </TableColumn> -->
                 <TableColumn sortable field="firstName" header="First Name">
                 </TableColumn>
                 <TableColumn
@@ -206,22 +225,20 @@
                       <SubmitButton
                         :id="data.id"
                         @click="deleData(data.id)"
+                        label="Delete"
                         type="button"
                         icon="pi pi-trash"
                         rounded
                       />
 
                       <SubmitButton
-                        type="button"
-                        icon="pi pi-pencil"
-                        rounded
-                        severity="success"
-                      />
-                      <SubmitButton
                         @click="submitProfile(data)"
                         label="Profile"
-                        style="background: #d81221 !important"
+                        type="button"
                         icon="pi pi-user"
+                        rounded
+                        severity="success"
+                        style="background: rgb(21, 171, 21) !important"
                       />
                     </div>
                   </template>
@@ -231,7 +248,7 @@
               <ConfirmDialog></ConfirmDialog>
             </TabPanel>
             <TabPanel header="Cards">
-              <p>CARDS</p>
+              <div class="cart_panel">Cart</div>
             </TabPanel>
           </TabView>
         </div>
@@ -242,54 +259,22 @@
 
 <script setup>
 import axios from "axios";
-import { watch, onMounted, ref } from "vue";
+import { watch, computed, onMounted, ref } from "vue";
 import { useForm } from "vee-validate";
 import * as yup from "yup";
 import { useRouter } from "vue-router";
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 const router = useRouter();
-// const data = ref();
-
 const visible = ref(false);
 const searchQuery = ref("");
 const totalRecords = ref(0);
 const confirm = useConfirm();
 const toast = useToast();
 const genderData = ref([]);
-// const searchData = ref([]);
-// const lazyParams = ref({
-//   first: 0,
-//   rows: 5,
-//   page: 1,
-// });
 
 const genderValue = ref();
 
-// const filterData = computed(() => {
-//   if (!data.value) {
-//     return [];
-//   }
-
-//   console.log("comput ");
-//   let results = data.value;
-
-//   if (searchText.value)
-//     results = results.filter(
-//       (item) =>
-//         item.firstName.toUpperCase().includes(searchText.value.toUpperCase()) ||
-//         item.lastName.toUpperCase().includes(searchText.value.toUpperCase()) ||
-//         item.email.toUpperCase().includes(searchText.value.toUpperCase()) ||
-//         item.phone.includes(searchText.value)
-//     );
-
-//   if (genderValue.value) {
-//     results = results.filter((item) => item.gender === genderValue.value);
-//   }
-//   console.log({ data: data.value, results });
-//   return results;
-// });
-const filterData = ref([]);
 const filteredData = ref([]);
 const { errors, handleSubmit, defineField } = useForm({
   validationSchema: yup.object({
@@ -309,7 +294,9 @@ const { errors, handleSubmit, defineField } = useForm({
     weight: yup.string().required(),
   }),
 });
-
+const computedIndex = computed(() => {
+  return lazyParams.value.page * lazyParams.value.rows - lazyParams.value.rows;
+});
 const onSubmit = handleSubmit((values) => {
   confirm.require({
     message: "Do you want to Add this record?",
@@ -373,18 +360,8 @@ const fetchUsers = async (
   sortField = "firstName,lastName,email,height,phone,weight,age,gender",
   sortOrder = "asc"
 ) => {
-  // console.log("fetch");
-  // const { first, row, page } = lazyParams;
-  // const skip = ((page || 0) - 1) * (row || 0);
-
-  // console.log({ first, row, lazyParams });
-  // const url = `https://dummyjson.com/users/search?q=${
-  //   searchQuery.value
-  // }&limit=${first ?? 10}&skip=${
-  //   skip ?? 0
-  // }&select=firstName,lastName,email,height,phone,weight`;
   const page = lazyParams.page;
-  // const first = lazyParams.first;
+
   const row = lazyParams.rows;
   const limit = (page - 1) * row;
   const url_limit = `https://dummyjson.com/users/search?q=${searchQuery.value}&limit=${row}&skip=${limit}&sortBy=${sortField}&order=${sortOrder}&select=firstName,lastName,email,height,phone,weight,age,gender`;
@@ -394,27 +371,13 @@ const fetchUsers = async (
     const response = await axios.get(url_limit);
 
     const { data } = response;
-    filterData.value = data.users;
     filteredData.value = data.users;
-
     totalRecords.value = data.total;
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu:", error);
   } finally {
     loading.value = false;
   }
-  // try {
-  //   loading.value = true;
-  //   const response = await axios.get(url_sort);
-
-  //   const { users, total } = response.data;
-  //   filterData.value = users;
-  //   totalRecords.value = total;
-  // } catch (error) {
-  //   console.error("Error fetching data:", error);
-  // } finally {
-  //   loading.value = false;
-  // }
 };
 
 const lazyParams = ref({
@@ -434,11 +397,8 @@ const sortOrder = ref("");
 const onSort = (event) => {
   const sortField = event.sortField;
   const sortOrder = event.sortOrder === 1 ? "asc" : "desc";
-  console.log("onSort");
+
   fetchUsers(lazyParams.value, sortField, sortOrder);
-};
-const onFilter = async (event) => {
-  console.log(event);
 };
 
 onMounted(() => {
@@ -446,41 +406,14 @@ onMounted(() => {
 });
 const submitProfile = (data) => {
   if (data && data.id) {
-    // localStorage.setItem("useData", JSON.stringify(data));
-
     router.push({ name: "employee-detail", params: { id: data.id } });
   } else {
     console.error("Không có dữ liệu hợp lệ được chọn.");
   }
 };
 watch([searchQuery], () => {
-  console.log("watch([searchQuery, genderValue>>>>");
-  fetchUsers(lazyParams.value, sortField.value, sortOrder.value);
+  debouncedSearch();
 });
-
-// const applyFilters = async () => {
-//   let results = filterData.value;
-//   console.log(1);
-//   if (searchQuery.value) {
-//     console.log(2);
-// results = results.filter(
-//   (item) =>
-//     item.firstName
-//       .toUpperCase()
-//       .includes(searchQuery.value.toUpperCase()) ||
-//     item.lastName.toUpperCase().includes(searchQuery.value.toUpperCase()) ||
-//     item.email.toUpperCase().includes(searchQuery.value.toUpperCase()) ||
-//     item.phone.includes(searchQuery.value)
-//);
-//     fetchUsers(lazyParams.value, sortField.value, sortOrder.value);
-//   }
-
-//   if (genderValue.value) {
-//     console.log();
-//   }
-
-//   filteredData.value = results;
-// };
 
 const resetFilters = () => {
   searchQuery.value = "";
@@ -488,9 +421,7 @@ const resetFilters = () => {
   fetchUsers(lazyParams.value);
 };
 const handleSearch = () => {
-  // searchQuery.value = "";
-  // genderValue.value = "";
-  fetchUsers(lazyParams.value, sortField, sortOrder);
+  debouncedSearch();
 };
 const deleData = (id) => {
   confirm.require({
@@ -529,18 +460,46 @@ const url_filter = (val) =>
   `https://dummyjson.com/users/filter?key=gender&value=${val}`;
 const options = ref(["male", "female"]);
 const genderClick = async () => {
-  try {
-    const response = await axios.get(url_filter(genderValue.value));
-    console.log({ genderValue: genderValue.value, response });
-    genderData.value = response.data;
-    filteredData.value = response.data.users;
-  } catch (error) {
-    console.error("Error data");
+  if (genderValue.value) {
+    try {
+      loading.value = true;
+      const response = await axios.get(url_filter(genderValue.value));
+      totalRecords.value = response.data.total;
+      genderData.value = response.data;
+      filteredData.value = response.data.users;
+    } catch (error) {
+      console.error("Error data");
+    } finally {
+      loading.value = false;
+    }
+  } else {
+    fetchUsers(lazyParams.value);
   }
+};
+// const index = computed;
+let timoutID;
+const debouncedSearch = () => {
+  clearTimeout(timoutID);
+  timoutID = setTimeout(
+    () =>
+      fetchUsers(
+        lazyParams.value,
+        sortField.value,
+        sortOrder.value,
+        searchQuery.value
+      ),
+    300
+  );
 };
 </script>
 
 <style scoped>
+.cart_panel {
+  border-radius: 20px;
+  border: 1px solid #000000de;
+  height: 100px;
+  padding: 20px;
+}
 form {
   display: block;
 }
@@ -550,33 +509,42 @@ h2 {
   margin: 0 0 8px;
   color: #000000de;
 }
-.p-inputtext.p-component {
+.addEmployee {
+  display: flex;
+  justify-content: space-between;
+  align-content: center;
+  width: 1252px;
+  margin: 10px;
+}
+/* .p-inputtext.p-component {
   width: 40%;
   height: 50px;
-}
+} */
 /* .p-inputtext.p-component {
   width: 300px;
 } */
-.card.flex.flex-wrap.justify-center.gap-1 {
+/* .card.flex.flex-wrap.justify-center.gap-1 {
   justify-content: space-between;
-}
+} */
 /* .card.flex.justify-center {
   margin: 20px;
 } */
-.p-selectbutton.p-button-group.p-component {
+/* .p-selectbutton.p-button-group.p-component {
   display: flex;
-}
+} */
 .profile {
   display: flex;
   justify-content: space-between;
+  margin: 30px;
 }
 .profile-1,
 .profile-2 {
   width: 45%;
 }
-.p-inputtext.p-component.p-inputtext-sm {
+
+/* .p-inputtext.p-component.p-inputtext-sm {
   margin: 0;
-}
+} */
 .wrap_div {
   display: flex;
   flex-direction: column;
@@ -594,11 +562,5 @@ button {
   display: flex;
   justify-content: center;
   gap: 10px;
-}
-.p-tabview-nav-link .p-tabview-header-action {
-  margin-left: 10px;
-}
-.p-button.p-component.p-confirm-dialog-accept.p-button-danger {
-  background: #2196f3 !important;
 }
 </style>

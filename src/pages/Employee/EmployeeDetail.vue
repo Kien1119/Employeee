@@ -2,163 +2,145 @@
   <div>
     <div v-if="data">
       <h1>Employee Detail ID: ({{ data.id }})</h1>
-      <TabView>
+      <TabView @tab-change="onTabChange">
         <TabPanel header="User">
-          <div class="profile">
-            <div class="profile-1">
-              <div class="wrap_div">
-                <label for="firstName">First name</label>
-                <ValidationField name="firstName">
-                  <InputText
-                    class="input_class"
-                    type="text"
-                    name="firstName"
-                    v-model="data.firstName"
-                  />
-                </ValidationField>
+          <div v-if="activeTab === 0">
+            <div class="profile">
+              <div class="profile-1">
+                <div class="wrap_div">
+                  <label for="firstName">First name</label>
+                  <ValidationField name="firstName">
+                    <InputText
+                      class="input_class"
+                      type="text"
+                      name="firstName"
+                      v-model="data.firstName"
+                    />
+                  </ValidationField>
+                </div>
+                <div class="wrap_div">
+                  <label for="lastName">Last name</label>
+                  <ValidationField name="lastName">
+                    <InputText
+                      class="input_class"
+                      type="text"
+                      name="lastName"
+                      v-model="data.lastName"
+                    />
+                  </ValidationField>
+                </div>
+                <div class="wrap_div">
+                  <label for="phone">Phone</label>
+                  <ValidationField name="Phone">
+                    <InputText
+                      class="input_class"
+                      type="text"
+                      name="phone"
+                      v-model="data.phone"
+                    />
+                  </ValidationField>
+                </div>
               </div>
-              <div class="wrap_div">
-                <label for="lastName">Last name</label>
-                <ValidationField name="lastName">
-                  <InputText
-                    class="input_class"
-                    type="text"
-                    name="lastName"
-                    v-model="data.lastName"
-                  />
-                </ValidationField>
-              </div>
-              <div class="wrap_div">
-                <label for="phone">Phone</label>
-                <ValidationField name="Phone">
-                  <InputText
-                    class="input_class"
-                    type="text"
-                    name="phone"
-                    v-model="data.phone"
-                  />
-                </ValidationField>
+
+              <div class="profile-2">
+                <div class="wrap_div">
+                  <label for="email">Email</label>
+                  <ValidationField name="email">
+                    <InputText
+                      class="input_class"
+                      type="text"
+                      name="email"
+                      v-model="data.email"
+                      v-bind="emailAttrs"
+                    />
+                  </ValidationField>
+                </div>
+                <div class="wrap_div">
+                  <label for="weight">Weight</label>
+                  <ValidationField name="weight">
+                    <InputText
+                      class="input_class"
+                      type="text"
+                      name="weight"
+                      v-model="data.weight"
+                      v-bind="weightAttrs"
+                    />
+                  </ValidationField>
+                </div>
+                <div class="wrap_div">
+                  <label for="height">Height</label>
+                  <ValidationField name="height">
+                    <InputText
+                      class="input_class"
+                      type="text"
+                      name="height"
+                      v-model="data.height"
+                      v-bind="heightAttrs"
+                    />
+                  </ValidationField>
+                </div>
+                <div class="wrap_div">
+                  <label for="age">Age</label>
+                  <ValidationField name="age">
+                    <InputText
+                      class="input_class"
+                      type="text"
+                      name="age"
+                      v-model="data.age"
+                      v-bind="ageAttrs"
+                    />
+                  </ValidationField>
+                </div>
               </div>
             </div>
 
-            <div class="profile-2">
-              <div class="wrap_div">
-                <label for="email">Email</label>
-                <ValidationField name="email">
-                  <InputText
-                    class="input_class"
-                    type="text"
-                    name="email"
-                    v-model="data.email"
-                    v-bind="emailAttrs"
-                  />
-                </ValidationField>
-              </div>
-              <div class="wrap_div">
-                <label for="weight">Weight</label>
-                <ValidationField name="weight">
-                  <InputText
-                    class="input_class"
-                    type="text"
-                    name="weight"
-                    v-model="data.weight"
-                    v-bind="weightAttrs"
-                  />
-                </ValidationField>
-              </div>
-              <div class="wrap_div">
-                <label for="height">Height</label>
-                <ValidationField name="height">
-                  <InputText
-                    class="input_class"
-                    type="text"
-                    name="height"
-                    v-model="data.height"
-                    v-bind="heightAttrs"
-                  />
-                </ValidationField>
-              </div>
-              <div class="wrap_div">
-                <label for="age">Age</label>
-                <ValidationField name="age">
-                  <InputText
-                    class="input_class"
-                    type="text"
-                    name="age"
-                    v-model="data.age"
-                    v-bind="ageAttrs"
-                  />
-                </ValidationField>
+            <div class="wrap_div_button">
+              <ConfirmToast />
+              <ConfirmDialog></ConfirmDialog>
+              <div class="card flex flex-wrap gap-2 justify-center">
+                <SubmitButton @click="onSubmit" label="Save" outlined />
+                <SubmitButton
+                  @click="onChangeCancel"
+                  label="Cancel"
+                  severity="danger"
+                  outlined
+                />
               </div>
             </div>
-          </div>
-
-          <div class="wrap_div_button">
-            <!-- <SubmitButton
-          label="Cancel"
-          @click="onChangeCancel"
-          severity="secondary"  
-          style="min-width: 10rem"
-        /> -->
-            <ConfirmToast />
-            <ConfirmDialog></ConfirmDialog>
-            <div class="card flex flex-wrap gap-2 justify-center">
-              <SubmitButton
-                @click="onSubmit"
-                label="Save"
-                outlined
-              ></SubmitButton>
-              <SubmitButton
-                @click="onChangeCancel"
-                label="Cancel"
-                severity="danger"
-                outlined
-              ></SubmitButton>
-            </div>
-            <!-- <SubmitButton
-          type="button"
-          label="Cancel"
-          severity="secondary"
-          @click="oncancel"
-        ></SubmitButton> -->
-            <!-- <SubmitButton
-          type="button"
-          label="Save"
-          @click="onSubmit"
-        ></SubmitButton> -->
           </div>
         </TabPanel>
         <TabPanel header="Cards">
-          <div v-if="userPosts && userPosts.length > 0" class="body-card">
-            <BodyCard v-for="(item, index) in userPosts" :key="index">
-              <template #title>{{ item.title }}</template>
-              <template #content>
-                <p class="m-0">
-                  {{ item.body }}
-                </p>
-              </template>
-            </BodyCard>
-          </div>
-          <div v-else>
-            <span>Không có thẻ Card nào!!!</span>
+          <div v-if="activeTab === 1">
+            <div v-if="userPosts && userPosts.length > 0" class="body-card">
+              <BodyCard
+                class="item_body"
+                v-for="(item, index) in userPosts"
+                :key="index"
+              >
+                <template #title>{{ item.title }}</template>
+                <template #content>
+                  <p class="m-0">{{ item.body }}</p>
+                </template>
+              </BodyCard>
+            </div>
+            <div v-else>
+              <span> Không có thẻ Card nào!!!</span>
+            </div>
           </div>
         </TabPanel>
         <TabPanel header="To do">
-          <div v-if="userTodo" class="card">
-            <DataTable :value="userTodo" tableStyle="min-width: 50rem">
-              <TableColumn field="id" header="ID"></TableColumn>
-              <TableColumn field="todo" header="TO DO"></TableColumn>
-              <TableColumn field="completed" header="COMPLETED"></TableColumn>
-              <TableColumn field="userId" header="User ID"></TableColumn>
-            </DataTable>
+          <div v-if="activeTab === 2">
+            <div v-if="userTodo" class="card">
+              <DataTable :value="userTodo" tableStyle="min-width: 50rem">
+                <TableColumn field="id" header="ID"></TableColumn>
+                <TableColumn field="todo" header="TO DO"></TableColumn>
+                <TableColumn field="completed" header="COMPLETED"></TableColumn>
+                <TableColumn field="userId" header="User ID"></TableColumn>
+              </DataTable>
+            </div>
           </div>
         </TabPanel>
       </TabView>
-
-      <!-- <div v-for="(item, index) in userPosts" :key="index">
-        <h2>{{ item.title }}</h2>
-        <p>{{ item.body }}</p>
-      </div> -->
     </div>
     <div v-else-if="loading">
       <ProgressSpinner
@@ -195,9 +177,7 @@ const data = ref(null);
 const userPosts = ref(null);
 const loading = ref(false);
 const userTodo = ref(null);
-// const oncancel = () => {
-//   route.push({ path: "/employee" });
-// };
+const activeTab = ref(0);
 
 const onSubmit = () => {
   confirm.require({
@@ -229,30 +209,34 @@ const onSubmit = () => {
             `https://dummyjson.com/users/${route.currentRoute.value.params.id}`,
             req
           );
+          toast.add({
+            severity: "success",
+            summary: "Success",
+            detail: "Data saved successfully",
+            life: 3000,
+          });
         } catch (error) {
-          console.error("lỗi data");
+          console.error("Error saving data");
+          toast.add({
+            severity: "error",
+            summary: "Error",
+            detail: "Failed to save data",
+            life: 3000,
+          });
         }
-      } else {
-        console.log("edit thất bại");
       }
-
-      toast.add({
-        severity: "info",
-        summary: "Confirmed",
-        detail: "You have accepted",
-        life: 3000,
-      });
     },
     reject: () => {
       toast.add({
         severity: "error",
-        summary: "Rejected",
-        detail: "You have rejected",
+        summary: "Cancelled",
+        detail: "Action cancelled",
         life: 3000,
       });
     },
   });
 };
+
 const onChangeCancel = () => {
   confirm.require({
     message: "Do you want to cancel this record?",
@@ -266,7 +250,7 @@ const onChangeCancel = () => {
       toast.add({
         severity: "info",
         summary: "Confirmed",
-        detail: "Record deleted",
+        detail: "Record cancelled",
         life: 3000,
       });
       route.push({ path: "/employee" });
@@ -281,84 +265,65 @@ const onChangeCancel = () => {
     },
   });
 };
-const fetchDaaUser = async () => {
+
+const fetchDaaUser = async (tabIndex) => {
   try {
     loading.value = true;
-    await axios
-      .get(`https://dummyjson.com/users/${route.currentRoute.value.params.id}`)
-      .then((response) => {
-        data.value = response.data;
-      })
-      .catch((error) => {
-        console.error("Error fetching data data:", error);
-      });
-
-    await axios
-      .get(
-        `https://dummyjson.com/users/${route.currentRoute.value.params.id}/posts`
-      )
-      .then((response) => {
-        userPosts.value = response.data.posts;
-      })
-      .catch((error) => {
-        console.error("Error fetching data data:", error);
-      });
-    await axios
-      .get(
-        `https://dummyjson.com/users/${route.currentRoute.value.params.id}/todos`
-      )
-      .then((response) => {
-        console.log({ response });
-        userTodo.value = response.data.todos;
-        console.log("userTodo", userTodo.value);
-      })
-      .catch((error) => {
-        console.error("Error fetching data data:", error);
-      });
+    switch (tabIndex) {
+      case 0:
+        if (!data.value) {
+          const response = await axios.get(
+            `https://dummyjson.com/users/${route.currentRoute.value.params.id}`
+          );
+          data.value = response.data;
+        }
+        break;
+      case 1:
+        if (!userPosts.value) {
+          const response = await axios.get(
+            `https://dummyjson.com/users/${route.currentRoute.value.params.id}/posts`
+          );
+          userPosts.value = response.data.posts;
+        }
+        break;
+      case 2:
+        if (!userTodo.value) {
+          const response = await axios.get(
+            `https://dummyjson.com/users/${route.currentRoute.value.params.id}/todos`
+          );
+          userTodo.value = response.data.todos;
+        }
+        break;
+    }
   } catch (error) {
-    console.error("khong co du lieu nao o day");
+    console.error("Error fetching data");
   } finally {
     loading.value = false;
   }
 };
-// const fetchCard = async () => {
-//   await axios
-//     .put(
-//       `https://dummyjson.com/users/${route.currentRoute.value.params.id}/posts`
-//     )
-//     .then((response) => {
-//       data.value = response.data;
-//       console.log({ data: data.value });
-//     });
-// };
+
+const onTabChange = (event) => {
+  activeTab.value = event.index;
+  fetchDaaUser(activeTab.value);
+};
+
 onMounted(() => {
-  // const storedData = JSON.parse(localStorage.getItem("useData"));
-  //   console.log({ storedData });
-  //   if (storedData) {
-  //     // data.value = storedData;
-  //     console.log({ data: data.value });
-  //   }
-  // Gửi yêu cầu API để lấy chi tiết người dùng dựa trên ID
-  fetchDaaUser();
-  // fetchCard();
+  fetchDaaUser(0);
 });
 </script>
 
-<style>
-.card {
-  margin: 1rem;
-}
-
-.employe-detail {
+<style scoped>
+.profile {
   display: flex;
   justify-content: space-around;
   border: 1px solid #6666;
 
   background: #cccccc;
-  height: 100vh;
+  height: 400px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 .wrap_div {
+  margin-top: 10px;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -372,6 +337,7 @@ onMounted(() => {
 .wrap_div_button {
   display: flex;
   justify-content: flex-end;
+  margin-top: 20px;
 }
 .profile {
   display: flex;
@@ -385,10 +351,11 @@ onMounted(() => {
 .body-card {
   display: flex;
 }
-.p-card-body {
+/* .item_body {
   margin: 20px;
 }
-.p-card.p-component {
+*/
+.item_body {
   margin: 20px;
   width: 30%;
   background: #3333;
