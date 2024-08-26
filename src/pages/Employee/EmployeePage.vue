@@ -265,6 +265,8 @@ import * as yup from "yup";
 import { useRouter } from "vue-router";
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
+import { useEmploymentStore } from "@/stores/modules/employment";
+const stores = useEmploymentStore;
 const router = useRouter();
 const visible = ref(false);
 const searchQuery = ref("");
@@ -297,7 +299,7 @@ const { errors, handleSubmit, defineField } = useForm({
 const computedIndex = computed(() => {
   return lazyParams.value.page * lazyParams.value.rows - lazyParams.value.rows;
 });
-const onSubmit = handleSubmit((values) => {
+const onSubmit = handleSubmit(async () => {
   confirm.require({
     message: "Do you want to Add this record?",
     header: "Add Employeee",
@@ -314,13 +316,12 @@ const onSubmit = handleSubmit((values) => {
         life: 3000,
       });
       const req = {
-        firstName: values.firstName,
-        lastName: values.lastName,
-        email: values.email,
-        height: values.height,
-        phone: values.phone,
-        weight: values.weight,
-        gender: values.gender,
+        firstName: stores.firstName,
+        lastName: stores.lastName,
+        email: stores.email,
+        height: stores.height,
+        phone: stores.phone,
+        weight: stores.weight,
       };
       if (req) {
         try {

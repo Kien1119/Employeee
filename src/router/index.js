@@ -4,6 +4,12 @@ import MainLayout from "@/Layouts/MainLayout.vue";
 
 export const routes = [
   {
+    path: "/state",
+    name: "Statement",
+    component: () => import("../pages/StateA/StateEmployement.vue"),
+    meta: { layout: MainLayout, requiresAuth: true },
+  },
+  {
     path: "/",
     name: "Home",
     component: () => import("../pages/HomePage/HomePage.vue"),

@@ -28,6 +28,10 @@ const cities = [
     to: "/test",
   },
   {
+    name: "Statement",
+    to: "/state",
+  },
+  {
     name: "Logout",
     to: "/logout",
   },
