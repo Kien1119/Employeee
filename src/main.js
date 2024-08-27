@@ -34,6 +34,7 @@ import ConfirmationService from "primevue/confirmationservice";
 import ToastService from "primevue/toastservice";
 import DataView from "primevue/dataview";
 import ProgressSpinner from "primevue/progressspinner";
+import Dropdown from "primevue/dropdown";
 const app = createApp(App);
 const pinia = createPinia();
 
@@ -65,6 +66,7 @@ app.component("ConfirmDialog", ConfirmDialog);
 app.component("ConfirmToast", Toast);
 app.component("DataView", DataView);
 app.component("ProgressSpinner", ProgressSpinner);
+app.component("DropdownField", Dropdown);
 app.use(ConfirmationService);
 app.use(ToastService);
 app.mount("#app");

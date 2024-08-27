@@ -83,6 +83,22 @@
                     />
                   </ValidationField>
                 </div>
+                {{ gender }}
+                <div class="wrap_div">
+                  <label for="gender">Gender</label>
+                  <ValidationField name="gender">
+                    <DropdownField
+                      class="input_class"
+                      v-model="gender"
+                      editable
+                      :options="genderOption"
+                      optionValue="name"
+                      optionLabel="name"
+                      placeholder="Select a Gender"
+                      v-bind="genderAttrs"
+                    />
+                  </ValidationField>
+                </div>
                 <span style="color: #d81221">{{ errors.email }}</span>
               </div>
 
@@ -126,6 +142,19 @@
                     />
                   </ValidationField>
                   <span style="color: #d81221">{{ errors.weight }}</span>
+                </div>
+                <div class="wrap_div">
+                  <label for="age">Age</label>
+                  <ValidationField name="age">
+                    <InputText
+                      class="input_class"
+                      type="text"
+                      name="age"
+                      v-model="age"
+                      v-bind="ageAttrs"
+                    />
+                  </ValidationField>
+                  <span style="color: #d81221">{{ errors.age }}</span>
                 </div>
               </div>
             </div>
@@ -265,8 +294,8 @@ import * as yup from "yup";
 import { useRouter } from "vue-router";
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
-import { useEmploymentStore } from "@/stores/modules/employment";
-const stores = useEmploymentStore;
+import { useCounterStore } from "@/stores/modules/employment";
+const stores = useCounterStore();
 const router = useRouter();
 const visible = ref(false);
 const searchQuery = ref("");
@@ -278,6 +307,11 @@ const genderData = ref([]);
 const genderValue = ref();
 
 const filteredData = ref([]);
+// const gender = ref(null);
+const genderOption = ref([
+  { name: "Female", code: "FE" },
+  { name: "Male", code: "MA" },
+]);
 const { errors, handleSubmit, defineField } = useForm({
   validationSchema: yup.object({
     firstName: yup
@@ -294,12 +328,15 @@ const { errors, handleSubmit, defineField } = useForm({
     height: yup.string().required(),
     phone: yup.string().min(11).required(),
     weight: yup.string().required(),
+    age: yup.string().required(),
+    gender: yup.string().required(),
   }),
 });
 const computedIndex = computed(() => {
   return lazyParams.value.page * lazyParams.value.rows - lazyParams.value.rows;
 });
-const onSubmit = handleSubmit(async () => {
+const onSubmit = handleSubmit((values) => {
+  console.log(1);
   confirm.require({
     message: "Do you want to Add this record?",
     header: "Add Employeee",
@@ -316,22 +353,25 @@ const onSubmit = handleSubmit(async () => {
         life: 3000,
       });
       const req = {
-        firstName: stores.firstName,
-        lastName: stores.lastName,
-        email: stores.email,
-        height: stores.height,
-        phone: stores.phone,
-        weight: stores.weight,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        height: values.height,
+        phone: values.phone,
+        weight: values.weight,
+        age: values.age,
+        gender: values.gender,
       };
+
       if (req) {
         try {
-          await axios.post(`https://dummyjson.com/users/add`, req);
-
+          const a = await stores.addEmployee(req);
+          console.log(a);
+          filteredData.value.unshift(a);
           visible.value = true;
         } catch (error) {
           console.error("lỗi data");
         }
-
         visible.value = false;
       } else {
         alert("Add Thất bại");
@@ -354,6 +394,8 @@ const [email, emailAttrs] = defineField("email");
 const [height, heightAttrs] = defineField("height");
 const [phone, phoneAttrs] = defineField("phone");
 const [weight, weightAttrs] = defineField("weight");
+const [age, ageAttrs] = defineField("age");
+const [gender, genderAttrs] = defineField("gender");
 const loading = ref(false);
 
 const fetchUsers = async (
@@ -372,7 +414,7 @@ const fetchUsers = async (
     const response = await axios.get(url_limit);
 
     const { data } = response;
-    filteredData.value = data.users;
+    filteredData.value = data.users; // data fetch user
     totalRecords.value = data.total;
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu:", error);
