@@ -169,6 +169,7 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
+import { useCounterStore } from "@/stores/modules/employment";
 
 const confirm = useConfirm();
 const toast = useToast();
@@ -177,8 +178,9 @@ const data = ref(null);
 const userPosts = ref(null);
 const loading = ref(false);
 const userTodo = ref(null);
-const activeTab = ref(0);
 
+const activeTab = ref(0);
+const dataStore = useCounterStore();
 const onSubmit = () => {
   confirm.require({
     message: "Are you sure you want to proceed?",
@@ -202,7 +204,6 @@ const onSubmit = () => {
         weight: data.value.weight,
         age: data.value.age,
       };
-
       if (req) {
         try {
           await axios.put(
@@ -271,11 +272,15 @@ const fetchDaaUser = async (tabIndex) => {
     loading.value = true;
     switch (tabIndex) {
       case 0:
-        if (!data.value) {
+        try {
           const response = await axios.get(
             `https://dummyjson.com/users/${route.currentRoute.value.params.id}`
           );
           data.value = response.data;
+        } catch (error) {
+          // lay trong store
+
+          data.value = dataStore.addEmp[0];
         }
         break;
       case 1:

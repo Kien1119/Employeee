@@ -35,8 +35,8 @@
       <TableColumn field="userName" header="Username"></TableColumn>
       <TableColumn field="weight" header=""></TableColumn>
     </DataTable> -->
+    <!-- :loading="loading" -->
     <DataTable
-      :loading="loading"
       lazy
       selectionMode="single"
       scrollable
@@ -44,19 +44,13 @@
       :value="products"
       tableStyle="min-width: 50rem"
     >
+      <ConfirmToast />
+      <ConfirmDialog />
       <TableColumn field="stt" header="STT" page="" style="width: 10rem">
         <template #body="{ index }">
           {{ index + 1 }}
         </template>
       </TableColumn>
-
-      <!-- <template #body="{ index }">
-                  <ConfirmToast />
-                  <div class="flex flex-wrap gap-2">
-                    {{ index }}
-                  </div>
-                </template> -->
-      <!-- <TableColumn sortable field="id" header="ID"> </TableColumn> -->
       <TableColumn sortable field="firstName" header="First Name">
       </TableColumn>
       <TableColumn sortable field="lastName" header="Last Name"></TableColumn>
@@ -68,7 +62,6 @@
       <TableColumn sortable field="age" header="Age"> </TableColumn>
       <TableColumn field="Actions" header="Actions" style="width: 10rem">
         <template #body="{ data }">
-          <ConfirmToast />
           <div class="flex flex-wrap gap-2">
             <SubmitButton
               :id="data.id"
@@ -98,20 +91,69 @@
 <script setup>
 import { useCounterStore } from "@/stores/modules/employment";
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+
+// import { useToast } from "primevue/usetoast";
+// import { useConfirm } from "primevue/useconfirm";
+// const toast = useToast();
+// const confirm = useConfirm();
+
+import { useConfirm } from "primevue/useconfirm";
+import { useToast } from "primevue/usetoast";
+
+const confirm = useConfirm();
+const toast = useToast();
+const router = useRouter();
 const products = ref([]);
 const counterStore = useCounterStore();
-
 onMounted(() => {
-  console.log({ counterStore });
   try {
     const empList = counterStore.addEmp;
-    console.log({ empList });
 
     products.value = empList;
   } catch (error) {
     console.error("Error data");
   }
 });
+const deleData = (id) => {
+  confirm.require({
+    message: "Do you want to delete this record?",
+    header: "Danger Zone",
+    icon: "pi pi-info-circle",
+    rejectLabel: "Cancel",
+    acceptLabel: "Delete",
+    rejectClass: "p-button-secondary p-button-outlined",
+    acceptClass: "p-button-danger",
+    accept: () => {
+      toast.add({
+        severity: "info",
+        summary: "Confirmed",
+        detail: "Record deleted",
+        life: 3000,
+      });
+      products.value = products.value.filter((product) => product.id !== id);
+    },
+    reject: () => {
+      toast.add({
+        severity: "error",
+        summary: "Rejected",
+        detail: "You have rejected",
+        life: 3000,
+      });
+    },
+  });
+};
+
+const submitProfile = (data) => {
+  if (data) {
+    router.push({
+      name: "employee-detail",
+      params: { id: data.id },
+    });
+  } else {
+    confirm("Không có giá trị");
+  }
+};
 
 // console.log(counterStore.doubleCount);
 // console.log(counterStore.increment);

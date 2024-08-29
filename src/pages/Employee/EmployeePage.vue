@@ -336,7 +336,6 @@ const computedIndex = computed(() => {
   return lazyParams.value.page * lazyParams.value.rows - lazyParams.value.rows;
 });
 const onSubmit = handleSubmit((values) => {
-  console.log(1);
   confirm.require({
     message: "Do you want to Add this record?",
     header: "Add Employeee",
@@ -366,9 +365,10 @@ const onSubmit = handleSubmit((values) => {
       if (req) {
         try {
           const a = await stores.addEmployee(req);
-          console.log(a);
           filteredData.value.unshift(a);
+
           visible.value = true;
+          localStorage.setItem("userData", JSON.stringify(a));
         } catch (error) {
           console.error("lỗi data");
         }
@@ -404,7 +404,6 @@ const fetchUsers = async (
   sortOrder = "asc"
 ) => {
   const page = lazyParams.page;
-
   const row = lazyParams.rows;
   const limit = (page - 1) * row;
   const url_limit = `https://dummyjson.com/users/search?q=${searchQuery.value}&limit=${row}&skip=${limit}&sortBy=${sortField}&order=${sortOrder}&select=firstName,lastName,email,height,phone,weight,age,gender`;
