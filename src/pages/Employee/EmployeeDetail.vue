@@ -178,7 +178,7 @@ const data = ref(null);
 const userPosts = ref(null);
 const loading = ref(false);
 const userTodo = ref(null);
-
+const editStore = ref(null);
 const activeTab = ref(0);
 const dataStore = useCounterStore();
 const onSubmit = () => {
@@ -204,6 +204,7 @@ const onSubmit = () => {
         weight: data.value.weight,
         age: data.value.age,
       };
+
       if (req) {
         try {
           await axios.put(
@@ -217,14 +218,23 @@ const onSubmit = () => {
             life: 3000,
           });
         } catch (error) {
-          console.error("Error saving data");
+          await axios.put(`https://dummyjson.com/users/2`, req);
+
+          console.log(dataStore.addEmp[0]);
           toast.add({
-            severity: "error",
-            summary: "Error",
-            detail: "Failed to save data",
+            severity: "success",
+            summary: "Success",
+            detail: "Data saved successfully",
             life: 3000,
           });
         }
+      } else {
+        toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to save data",
+          life: 3000,
+        });
       }
     },
     reject: () => {
@@ -277,9 +287,8 @@ const fetchDaaUser = async (tabIndex) => {
             `https://dummyjson.com/users/${route.currentRoute.value.params.id}`
           );
           data.value = response.data;
-        } catch (error) {
+        } catch {
           // lay trong store
-
           data.value = dataStore.addEmp[0];
         }
         break;

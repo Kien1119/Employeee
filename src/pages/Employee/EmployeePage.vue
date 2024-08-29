@@ -83,19 +83,20 @@
                     />
                   </ValidationField>
                 </div>
-                {{ gender }}
+
                 <div class="wrap_div">
                   <label for="gender">Gender</label>
                   <ValidationField name="gender">
                     <DropdownField
                       class="input_class"
                       v-model="gender"
-                      editable
                       :options="genderOption"
-                      optionValue="name"
                       optionLabel="name"
                       placeholder="Select a Gender"
+                      checkmark
+                      :highlightOnSelect="false"
                       v-bind="genderAttrs"
+                      optionValue="name"
                     />
                   </ValidationField>
                 </div>
@@ -507,6 +508,7 @@ const genderClick = async () => {
       loading.value = true;
       const response = await axios.get(url_filter(genderValue.value));
       totalRecords.value = response.data.total;
+
       genderData.value = response.data;
       filteredData.value = response.data.users;
     } catch (error) {

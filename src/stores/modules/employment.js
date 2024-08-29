@@ -6,7 +6,7 @@ export const useCounterStore = defineStore("counter", {
     count: 1,
     employeeList: [
       {
-        id: 311012,
+        id: 1,
         firstName: "dsdsd",
         lastName: "dsdsd",
         maidenName: "",
